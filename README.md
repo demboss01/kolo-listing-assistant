@@ -136,18 +136,18 @@ The app will open automatically at `http://localhost:8501`.
 
 **Input:**
 ```
-iphone 12 bon état 128gb noir avec chargeur 150000 fcfa
+iphone 12 good condition 128gb black with charger 150000 fcfa
 ```
 
 **Output:**
 ```
-Title:        iPhone 12 128GB Noir — Excellent État avec Chargeur Original
-Category:     Téléphones & Tablettes
-Tags:         iphone, apple, smartphone, 128gb, noir
+Title:        iPhone 12 128GB Black — Excellent Condition with Original Charger
+Category:     Phones & Tablets
+Tags:         iphone, apple, smartphone, 128gb, black
 Trust Score:  78 / 100
-Pitch:        Bonjour ! Je vends mon iPhone 12 (128GB, noir) en
-              excellent état avec son chargeur original. Prix: 150 000 FCFA.
-              Disponible pour démonstration. Intéressé(e) ?
+Pitch:        Hello! I'm selling my iPhone 12 (128GB, black) in
+              excellent condition with its original charger. Price: 150,000 FCFA.
+              Available for demonstration. Interested?
 ```
 
 ---
