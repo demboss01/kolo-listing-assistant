@@ -250,7 +250,7 @@ This project is released under the [MIT License](LICENSE). You are free to use, 
 
 ## 📬 Contact
 
-**Author:** [Your Name]
+**Author:** Mamadou Dembele
 **Course:** CAP 942 — Capstone Project: AI Application Development
 **GitHub:** [@demboss01](https://github.com/demboss01)
 **Repository:** [demboss01/kolo-listing-assistant](https://github.com/demboss01/kolo-listing-assistant)
