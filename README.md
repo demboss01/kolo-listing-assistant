@@ -2,11 +2,12 @@
 
 > An offline AI tool that transforms rough, informal merchant inputs into polished, trust-optimized marketplace listings — running entirely on a local LLM, with no paid APIs and no internet required at runtime.
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-FF4B4B)
-![Ollama](https://img.shields.io/badge/Ollama-Llama%203.1%208B-black)
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![UV](https://img.shields.io/badge/Package%20Manager-UV-7C3AED)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.57-FF4B4B)
+![Ollama](https://img.shields.io/badge/Ollama-Llama%203.2%203B-black)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-In%20Development-orange)
+![Status](https://img.shields.io/badge/Status-Day%201%20Complete%20%E2%80%94%20Scaffold%20Ready-success)
 
 ---
 
@@ -14,7 +15,7 @@
 
 The **KOLO Listing Assistant** is a capstone project built for **CAP 942 — Capstone Project: AI Application Development**. It solves a concrete problem faced by informal-market merchants in West Africa: rough, unstructured marketplace listings that lose buyers and reduce trust scores.
 
-A merchant types a brief, casual description — for example, *"iphone 12 bon état 150000"* — and the application returns a structured, polished listing with a title, description, suggested category, tags, a trust-quality score, and a ready-to-send WhatsApp pitch. Everything runs locally on the user's machine through [Ollama](https://ollama.com), with no data ever leaving the device.
+A merchant types a brief, casual description — for example, *"iphone 12 good condition 128gb black with charger 150000 fcfa"* — and the application returns a structured, polished listing with a title, description, suggested category, tags, a trust-quality score, and a ready-to-send WhatsApp pitch. Everything runs locally on the user's machine through [Ollama](https://ollama.com), with no data ever leaving the device.
 
 ---
 
@@ -36,7 +37,7 @@ A merchant types a brief, casual description — for example, *"iphone 12 bon é
 ```
 ┌─────────────────┐      ┌──────────────────┐      ┌────────────────┐
 │  Streamlit UI   │ ───▶ │ Prompt Assembler │ ───▶ │  Ollama Local  │
-│  (User Input)   │      │   (Templating)   │      │  Llama 3.1 8B  │
+│  (User Input)   │      │   (Templating)   │      │  Llama 3.2 3B  │
 └─────────────────┘      └──────────────────┘      └────────┬───────┘
         ▲                                                    │
         │                                                    ▼
@@ -54,13 +55,13 @@ A more detailed workflow diagram lives in [`docs/workflow_diagram.png`](docs/wor
 
 | Layer | Tool | Purpose |
 |-------|------|---------|
-| Language | Python 3.10+ | Application logic |
+| Language | Python 3.11 | Application logic |
+| Package Manager | [UV](https://docs.astral.sh/uv/) | Fast, reproducible Python project management |
 | LLM Runtime | [Ollama](https://ollama.com) | Local model hosting |
-| Text Model | Llama 3.1 8B | Listing generation |
-| Vision Model *(v2)* | LLaVA 7B or Moondream2 | Photo-based extraction |
+| Text Model | Llama 3.2 3B | Listing generation |
+| Vision Model *(v2)* | LLaVA 7B | Photo-based extraction |
 | UI Framework | [Streamlit](https://streamlit.io) | Web interface |
 | Image Handling | Pillow | Image preprocessing (v2) |
-| Orchestration | LangChain *(light)* | Multi-step chain (v2) |
 
 ---
 
@@ -69,22 +70,37 @@ A more detailed workflow diagram lives in [`docs/workflow_diagram.png`](docs/wor
 ### Prerequisites
 
 - **macOS, Linux, or Windows** with at least **16 GB RAM**
-- **Python 3.10 or higher** ([download](https://www.python.org/downloads/))
+- **Python 3.11+** (UV will install this for you if missing)
 - **Ollama** ([download](https://ollama.com/download))
-- **~10 GB free disk space** for model weights
+- **~7 GB free disk space** for model weights
 
-> **Tested on:** Apple M1 Pro, 16 GB RAM, macOS. Performance: ~3–6 seconds per generation.
+> **Tested on:** Apple M1 Pro, 16 GB RAM, macOS. Performance: ~1–3 seconds per generation.
 
-### Step 1 — Install Ollama and pull the model
+### Step 1 — Install UV
+
+UV is a fast, modern Python package manager that handles virtual environments and dependencies in one tool.
+
+```bash
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell)
+# powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Verify
+uv --version
+```
+
+### Step 2 — Install Ollama and pull the model
 
 ```bash
 # macOS / Linux
 curl -fsSL https://ollama.com/install.sh | sh
 
-# Pull the text model (~4.7 GB)
-ollama pull llama3.1:8b
+# Pull the text model (~2.0 GB)
+ollama pull llama3.2:3b
 
-# Optional: pull the vision model for v2 photo support (~4.5 GB)
+# Optional: pull the vision model for v2 photo support (~4.7 GB)
 ollama pull llava:7b
 ```
 
@@ -94,29 +110,27 @@ Verify Ollama is running:
 ollama list
 ```
 
-### Step 2 — Clone the repository
+### Step 3 — Clone the repository
 
 ```bash
 git clone https://github.com/demboss01/kolo-listing-assistant.git
 cd kolo-listing-assistant
 ```
 
-### Step 3 — Set up the Python environment
+### Step 4 — Sync dependencies
+
+UV reads `pyproject.toml` and `uv.lock` to install everything in a managed virtual environment automatically:
 
 ```bash
-# Create and activate a virtual environment
-python3 -m venv venv
-source venv/bin/activate          # macOS / Linux
-# venv\Scripts\activate            # Windows
-
-# Install dependencies
-pip install -r requirements.txt
+uv sync
 ```
 
-### Step 4 — Run the application
+That single command replaces `python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`. Everything is installed in `.venv/` and locked to the exact versions in `uv.lock`.
+
+### Step 5 — Run the application
 
 ```bash
-streamlit run app.py
+uv run streamlit run app.py
 ```
 
 The app will open automatically at `http://localhost:8501`.
@@ -136,18 +150,18 @@ The app will open automatically at `http://localhost:8501`.
 
 **Input:**
 ```
-iphone 12 bon état 128gb noir avec chargeur 150000 fcfa
+iphone 12 good condition 128gb black with charger 150000 fcfa
 ```
 
 **Output:**
 ```
-Title:        iPhone 12 128GB Noir — Excellent État avec Chargeur Original
-Category:     Téléphones & Tablettes
-Tags:         iphone, apple, smartphone, 128gb, noir
+Title:        iPhone 12 128GB Black — Excellent Condition with Original Charger
+Category:     Phones & Tablets
+Tags:         iphone, apple, smartphone, 128gb, black
 Trust Score:  78 / 100
-Pitch:        Bonjour ! Je vends mon iPhone 12 (128GB, noir) en
-              excellent état avec son chargeur original. Prix: 150 000 FCFA.
-              Disponible pour démonstration. Intéressé(e) ?
+Pitch:        Hello! I'm selling my iPhone 12 (128GB, black) in
+              excellent condition with its original charger. Price: 150,000 FCFA.
+              Available for demonstration. Interested?
 ```
 
 ---
@@ -157,8 +171,11 @@ Pitch:        Bonjour ! Je vends mon iPhone 12 (128GB, noir) en
 ```
 kolo-listing-assistant/
 ├── app.py                      # Streamlit entry point
-├── requirements.txt            # Python dependencies
+├── pyproject.toml              # UV project manifest
+├── uv.lock                     # Locked dependency versions
+├── .python-version             # Python 3.11 pinned
 ├── README.md                   # This file
+├── IMPLEMENTATION.md           # Step-by-step build guide
 ├── LICENSE                     # MIT License
 ├── .gitignore
 ├── .env.example                # Configuration template
@@ -193,7 +210,7 @@ kolo-listing-assistant/
 
 This project was developed for **CAP 942 — Capstone Project: AI Application Development**. It satisfies all course requirements:
 
-- ✅ Uses an open-source LLM (Llama 3.1 via Ollama)
+- ✅ Uses an open-source LLM (Llama 3.2 via Ollama)
 - ✅ Accepts user input and produces LLM-generated output
 - ✅ Runs as a Streamlit web application
 - ✅ Implements an optional multi-step chain (vision → text) for advanced rubric credit
@@ -206,7 +223,7 @@ For the full problem statement, methodology, and design rationale, see [`docs/pr
 ## 🗺️ Roadmap
 
 - [x] Project proposal submitted
-- [x] Repository scaffolded
+- [x] Repository scaffolded with UV
 - [ ] Core prompt template developed
 - [ ] LLM client and response parser implemented
 - [ ] Streamlit UI complete (v1)
@@ -220,10 +237,10 @@ For the full problem statement, methodology, and design rationale, see [`docs/pr
 
 ## ⚠️ Known Limitations
 
-- **Cold-start latency** — the first generation after launching the app takes ~5–10 seconds while the model loads into memory. Subsequent generations are fast (~3–6 seconds).
+- **Cold-start latency** — the first generation after launching the app takes ~3–5 seconds while the model loads into memory. Subsequent generations are fast (~1–3 seconds).
 - **Output variability** — LLM responses are non-deterministic by nature. The same input may produce slightly different outputs across runs.
 - **Vision model accuracy *(v2)*** — vision models occasionally misidentify product details, especially in low-light photos. The text model still produces a usable listing from the merchant's typed input.
-- **Hardware dependency** — performance is best on Apple Silicon or recent Intel/AMD machines with 16 GB+ RAM. On older hardware, consider using smaller models such as `llama3.2:3b`.
+- **Hardware dependency** — performance is best on Apple Silicon or recent Intel/AMD machines with 16 GB+ RAM. On lower-end hardware, consider using `moondream` as an even lighter alternative.
 
 ---
 
@@ -242,15 +259,16 @@ This project is released under the [MIT License](LICENSE). You are free to use, 
 ## 🙏 Acknowledgments
 
 - The CAP 942 instructional team for the capstone framework
+- [Astral](https://astral.sh) for [UV](https://docs.astral.sh/uv/), the package manager used in this project
 - [Ollama](https://ollama.com) for making local LLM hosting effortless
-- [Meta AI](https://ai.meta.com) for releasing Llama 3.1 under an open license
+- [Meta AI](https://ai.meta.com) for releasing Llama 3.2 under an open license
 - The KOLO marketplace project, which inspired the problem framing
 
 ---
 
 ## 📬 Contact
 
-**Author:** [Your Name]
+**Author:** Mamadou Dembele
 **Course:** CAP 942 — Capstone Project: AI Application Development
 **GitHub:** [@demboss01](https://github.com/demboss01)
 **Repository:** [demboss01/kolo-listing-assistant](https://github.com/demboss01/kolo-listing-assistant)
