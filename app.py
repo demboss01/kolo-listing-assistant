@@ -46,7 +46,7 @@ with st.sidebar:
         "📱 iPhone (FR)": ("Phones & Tablets", "french", "iphone 12 bon état 128gb noir avec chargeur 150000 fcfa"),
         "🏍️ Yamaha (FR)": ("Vehicles", "french", "yamaha 125 2019 papiers à jour 850000"),
         "💄 Perfume (FR)": ("Beauty", "french", "parfum chanel coco mademoiselle 100ml authentique 45000"),
-        "🧪 Sparse input": ("Other", "english", "phone for sale"),
+        "🧪 Vague": ("Phones & Tablets", "english", "phone 50000"),
     }
 
     for label, (cat, lang, text) in examples.items():
