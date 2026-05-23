@@ -11,6 +11,13 @@ You MUST write the title, description, trust_explanation, AND whatsapp_pitch
 ALL in {language}. Every text field must be in {language}. Do not mix
 languages.
 
+CRITICAL FACT-USAGE RULE:
+Every number, price, brand, model, color, and accessory in your output MUST
+come from the {raw_input} above. NEVER copy numbers, prices, or product
+names from any examples shown elsewhere in this prompt. If the raw input
+says "300k", the price is 300,000 — not 150,000, not 200,000, not any other
+number. If the raw input has no price, the output has no price.
+
 INSTRUCTIONS:
 1. Use ONLY facts present in the raw description. Do not invent prices,
    brands, models, accessories, conditions, or specifications.
@@ -22,10 +29,19 @@ INSTRUCTIONS:
 4. The whatsapp_pitch must NEVER contain placeholders like "[non précisé]" or
    "[not specified]". If a fact is missing, simply omit it from the pitch.
 5. TITLE FORMAT: The title should describe WHAT the product is, not how much
-   it costs. Do NOT include the price in the title. The price is displayed
-   in a separate field on the KOLO marketplace. Keep titles concise (5-10
-   words), descriptive, and price-free.
-6. CURRENCY: For West African listings, default unwritten currency to FCFA.
+   it costs. Do NOT include the price in the title. Keep titles concise
+   (5-10 words), descriptive, and price-free.
+6. PRICE FORMATTING & PLACEMENT: When a price appears in the raw input, you
+   MUST:
+   - Expand shorthand: "150k" -> "150,000" (English) or "150 000" (French)
+   - Use the EXACT number from the raw input, never substitute a different number
+   - Add FCFA currency suffix if no currency is given
+   - Include the formatted price in BOTH the description AND the pitch
+   Example transformations (apply to whatever number is in the raw input):
+   - "300k" -> "300,000 FCFA"
+   - "850000" -> "850,000 FCFA"
+   - "5000 cfa" -> "5,000 FCFA"
+7. CURRENCY: For West African listings, default unwritten currency to FCFA.
 
 OUTPUT — respond with ONLY valid JSON, no preamble, no markdown code fences.
 ALL fields below are REQUIRED. Do not omit any field. trust_signals must
@@ -33,7 +49,7 @@ contain ALL FIVE booleans.
 
 {{
   "title": "string (5-10 words, brand+model+key specs, NO PRICE)",
-  "description": "string (2-4 sentences, only stated facts)",
+  "description": "string (2-4 sentences, ALL stated facts including price if present)",
   "category": "string (refined category)",
   "tags": ["3-7 lowercase tags"],
   "trust_signals": {{
@@ -43,16 +59,33 @@ contain ALL FIVE booleans.
     "has_brand_and_model": boolean,
     "has_warranty": boolean
   }},
-  "trust_explanation": "string (1-2 sentences on which signals are present/missing)",
-  "whatsapp_pitch": "string (friendly 2-3 sentence message from the seller, MUST include price if present in input)"
+  "trust_explanation": "string (this field will be replaced by Python, but include a brief placeholder)",
+  "whatsapp_pitch": "string (friendly 2-3 sentence message, MUST include the EXACT price from the raw input if one is present)"
 }}
 
 REMEMBER: title, description, trust_explanation, and whatsapp_pitch MUST
 all be written in {language}.
 
 TRUST SIGNAL DEFINITIONS (set each to true ONLY if explicitly in the raw description):
-- has_price: any number that could be a price (e.g. "150000", "850000 fcfa", "5000 cfa", "$200", "150k")
-- has_condition: any condition word ("good", "bon état", "neuf", "comme neuf", "used", "excellent", "occasion")
-- has_accessories: any included item ("with charger", "avec chargeur", "comes with box", "case included")
-- has_brand_and_model: BOTH a brand AND model are named (e.g. "iphone 12", "yamaha 125", "toyota corolla")
-- has_warranty: warranty, guarantee, or vehicle documents ("warranty", "garantie", "papiers à jour")
+
+- has_price: any number that could be a price.
+  TRUE if input contains a number like: "150000", "300k", "850000 fcfa", "5000 cfa", "$200", "150k fcfa"
+
+- has_condition: any condition word.
+  TRUE if input contains: "good", "good condition", "bon état", "neuf", "comme neuf", "used", "excellent", "occasion", "brand-new", "brand new"
+
+- has_accessories: any included item.
+  TRUE if input contains: "with charger", "avec chargeur", "charger included", "comes with box", "case included"
+
+- has_brand_and_model: TRUE if the input contains BOTH a recognizable brand
+  AND a model identifier.
+  TRUE if input contains: "iphone 12", "iphone 13", "iphone 14", "iphone 15",
+        "iphone 16", "iphone X", "iphone SE", "samsung galaxy s21",
+        "yamaha 125", "toyota corolla", "macbook pro m1", "louis vuitton",
+        "chanel coco mademoiselle"
+  FALSE if input is: "phone" alone, "moto" alone, "laptop" alone
+  IMPORTANT: ANY iPhone number counts as a model. Do NOT mark False just
+  because you don't recognize a specific recent number.
+
+- has_warranty: warranty, guarantee, or vehicle documents.
+  TRUE if input contains: "warranty", "garantie", "papiers à jour", "30 days return"

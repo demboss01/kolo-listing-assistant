@@ -18,18 +18,40 @@ CRITIC'S SCORE: {previous_score} / 12 (below the threshold of 10)
 ISSUES TO FIX:
 {issues}
 
-YOUR JOB:
-1. Re-generate the listing addressing every issue in the list above.
-2. Keep what was good in the previous listing.
-3. Write all text fields (title, description, trust_explanation,
-   whatsapp_pitch) in {language}.
-4. Use ONLY facts present in the raw description — do NOT invent details
-   to artificially boost the score.
-5. The title must NOT include the price.
-6. The pitch MUST include the price if a price is in the raw input.
+ABSOLUTE RULES — NEVER VIOLATE THESE:
+1. You MUST only use facts present in the ORIGINAL RAW INPUT above.
+2. You may NOT invent a brand, model, price, color, condition, accessory,
+   capacity, year, processor, camera spec, display size, or ANY other detail
+   that is not literally in the raw input.
+3. If the raw input is sparse (e.g. "phone for sale", "moto à vendre"),
+   the correct refinement is to keep the listing sparse and honest, NOT to
+   add invented details to inflate the score.
+4. NEVER fabricate a brand or model. If the raw input says "phone", the
+   product is "phone", not "Samsung Galaxy" or "iPhone".
+5. NEVER fabricate a price. If no price is in the raw input, the pitch must
+   not contain a price.
+6. NEVER fabricate accessories like "with charger", "comes with box", etc.
+7. The "fix" for missing information is to acknowledge the missing
+   information, NOT to invent it.
 
-OUTPUT — respond with ONLY valid JSON, no preamble, no markdown code fences.
-Same schema as the previous listing:
+EXAMPLE OF CORRECT REFINEMENT FOR SPARSE INPUT:
+- Raw input: "phone for sale"
+- Previous listing: title "Phone for sale", description "Phone available"
+- Critic complaint: "missing brand/model/price"
+- CORRECT refinement: keep the listing sparse — title "Phone for sale",
+  description "Phone available for sale. Contact seller for details on
+  brand, model, condition, and price."
+- WRONG refinement: invent "Samsung Galaxy S22 for sale" — this is HALLUCINATION
+
+YOUR JOB:
+1. Address the critic's issues ONLY IF they can be addressed using facts
+   already in the raw input.
+2. If an issue cannot be addressed without inventing facts, leave the
+   corresponding field honest and minimal.
+3. Write all text fields in {language}.
+4. The title must NOT include the price.
+
+OUTPUT — respond with ONLY valid JSON, no preamble, no markdown code fences:
 
 {{
   "title": "string (5-10 words, brand+model+key specs, NO PRICE)",
@@ -48,4 +70,5 @@ Same schema as the previous listing:
 }}
 
 REMEMBER: title, description, trust_explanation, and whatsapp_pitch MUST
-all be written in {language}.
+all be written in {language}. And ALL FACTS must come from the raw input,
+not from your training data or imagination.

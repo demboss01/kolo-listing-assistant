@@ -16,47 +16,60 @@ Description: {description}
 Pitch: {whatsapp_pitch}
 Trust signals: {trust_signals}
 
+CRITICAL: SPARSE-INPUT HANDLING
+If the ORIGINAL RAW INPUT is very short or vague (e.g. "phone for sale",
+"moto à vendre", "asdfghjkl"), then a SPARSE, HONEST listing is CORRECT.
+Do NOT deduct points for missing information that was not in the input.
+A faithful sparse listing should still score 10-12. The AI should never
+invent details to make a listing look richer.
+
 EVALUATE on SIX criteria. START at 2 for each and DEDUCT only for real issues:
 
 1. FAITHFULNESS (start at 2):
-   - Deduct 1 if there's a clear unsupported addition (e.g. invented brand,
-     invented accessory like "charger" for a perfume).
-   - Deduct 2 if there's major fabrication (invented price, invented phone
-     number, completely invented product spec).
-   - Do NOT deduct for reasonable inferences or slight phrasing polish.
+   - Deduct 1 if there's an unsupported addition (invented brand, accessory).
+   - Deduct 2 if there's major fabrication (invented brand AND model, invented
+     price, invented specs like display size or processor, invented phone
+     number).
+   - For sparse inputs: if the listing stays honestly sparse, score 2.
 
 2. COMPLETENESS (start at 2):
-   - Deduct 1 if ONE key fact from the input is missing from the pitch.
-   - Deduct 2 if MULTIPLE key facts are missing.
-   - Key facts: price, condition word, accessories explicitly mentioned.
-   - IMPORTANT: If the pitch contains the price number (e.g. "850000",
-     "Prix: 850000 fcfa"), price IS present. Score 2.
+   - Deduct 1 if a fact that IS in the raw input is missing from EITHER the
+     description OR the pitch.
+   - Deduct 2 if facts are missing from BOTH the description AND the pitch.
+   - Key facts to check: price, condition, accessories, brand+model.
+   - IMPORTANT: The price must appear in BOTH the description AND the pitch.
+     Check both. If the input contains "300k" and the description says only
+     "iPhone for sale" without any number, the description is missing the price.
+   - PRICE NUMBER VERIFICATION: Check that the price NUMBER in the output
+     matches the price NUMBER in the raw input. If the input says "300k" but
+     the output says "150,000 FCFA", that's a substitution error — score 0.
+   - SPARSE INPUT EXCEPTION: if the raw input only contains a few words,
+     do NOT deduct for missing brand/price/condition that weren't in the
+     input. Score 2 for honest sparse output.
 
 3. LANGUAGE_CONSISTENCY (start at 2):
    The expected language is {language}. Check title, description, and pitch.
    - If {language} is FRENCH, all three fields must be in French.
-     Examples of French: "Yamaha 125 avec papiers à jour", "Je vends mon iPhone".
    - If {language} is ENGLISH, all three fields must be in English.
-     Examples of English: "Yamaha 125 with up-to-date papers", "I'm selling my iPhone".
    - Brand names, numbers, units (Yamaha, 125cc, 2019), and currency words
-     (fcfa, $) are language-NEUTRAL. They do NOT count as either language.
+     (fcfa, $) are language-NEUTRAL.
    - Deduct 1 if ONE field is clearly in the wrong language.
    - Deduct 2 if MULTIPLE fields are clearly in the wrong language.
 
 4. FORMAT_QUALITY (start at 2):
-   - Deduct 1 if there's a minor issue (lowercase "fcfa", inconsistent spacing).
-   - Deduct 2 if there are placeholder tokens visible in output
-     (e.g. "[non précisé]", "[PRODUIT]") or broken currency.
+   - Deduct 1 if minor issue (lowercase "fcfa", inconsistent spacing).
+   - Deduct 2 if placeholder tokens visible ("[non précisé]", "[PRODUIT]")
+     or broken currency ("$ 150000 FCFA").
 
 5. TONE_APPROPRIATENESS (start at 2):
    - Deduct 1 if framing is slightly awkward.
-   - Deduct 2 if a service is framed as a sellable product or vice versa.
+   - Deduct 2 if service framed as sellable product or vice versa.
 
 6. TITLE_QUALITY (start at 2):
-   - The title should be SHORT (5-10 words) and describe what the product IS.
+   - Title should be SHORT (5-10 words) and describe what the product IS.
    - Titles must NOT include the price.
-   - Deduct 1 if the title is awkwardly long, repetitive, or off-topic.
-   - Deduct 2 if the title INCLUDES the price.
+   - Deduct 1 if title is awkwardly long, repetitive, or off-topic.
+   - Deduct 2 if title INCLUDES the price.
 
 OUTPUT — respond with ONLY valid JSON, no preamble, no markdown:
 
@@ -77,3 +90,6 @@ RULES:
 - Maximum is 12. Pass threshold is 10.
 - verdict is "PASS" if total_score is 10 or higher, otherwise "FAIL".
 - issues must be SPECIFIC: "Pitch is in English but expected French" not "language wrong".
+- If the listing is honestly sparse because the input was sparse,
+  this is GOOD behavior — do not deduct points for missing facts that
+  weren't in the input.
