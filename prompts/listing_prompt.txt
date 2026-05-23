@@ -6,26 +6,33 @@ INPUT:
 - Category: {category}
 - Raw description: {raw_input}
 
+OUTPUT LANGUAGE: {language}
+You MUST write the title, description, trust_explanation, AND whatsapp_pitch
+ALL in {language}. Every text field must be in {language}. Do not mix
+languages.
+
 INSTRUCTIONS:
-1. Detect the language of the raw description (French or English) and respond
-   in that same language. Currency words like "fcfa", "cfa", "$" are
-   language-neutral.
-2. Use ONLY facts present in the raw description. Do not invent prices,
+1. Use ONLY facts present in the raw description. Do not invent prices,
    brands, models, accessories, conditions, or specifications.
-3. If the description is very short, gibberish, or a service rather than a
+2. If the description is very short, gibberish, or a service rather than a
    product, produce an honest minimal listing.
-4. Detect whether the listing is a SERVICE (tutoring, plumbing, photography,
+3. Detect whether the listing is a SERVICE (tutoring, plumbing, photography,
    mechanic, etc.) or a PRODUCT. Frame services as offered ("I offer",
    "Je propose"), not sold ("for sale", "à vendre").
-5. The whatsapp_pitch must NEVER contain placeholders like "[non précisé]" or
+4. The whatsapp_pitch must NEVER contain placeholders like "[non précisé]" or
    "[not specified]". If a fact is missing, simply omit it from the pitch.
+5. TITLE FORMAT: The title should describe WHAT the product is, not how much
+   it costs. Do NOT include the price in the title. The price is displayed
+   in a separate field on the KOLO marketplace. Keep titles concise (5-10
+   words), descriptive, and price-free.
+6. CURRENCY: For West African listings, default unwritten currency to FCFA.
 
 OUTPUT — respond with ONLY valid JSON, no preamble, no markdown code fences.
 ALL fields below are REQUIRED. Do not omit any field. trust_signals must
 contain ALL FIVE booleans.
 
 {{
-  "title": "string (8-14 words, includes brand and model if present)",
+  "title": "string (5-10 words, brand+model+key specs, NO PRICE)",
   "description": "string (2-4 sentences, only stated facts)",
   "category": "string (refined category)",
   "tags": ["3-7 lowercase tags"],
@@ -37,8 +44,11 @@ contain ALL FIVE booleans.
     "has_warranty": boolean
   }},
   "trust_explanation": "string (1-2 sentences on which signals are present/missing)",
-  "whatsapp_pitch": "string (friendly 2-3 sentence message from the seller)"
+  "whatsapp_pitch": "string (friendly 2-3 sentence message from the seller, MUST include price if present in input)"
 }}
+
+REMEMBER: title, description, trust_explanation, and whatsapp_pitch MUST
+all be written in {language}.
 
 TRUST SIGNAL DEFINITIONS (set each to true ONLY if explicitly in the raw description):
 - has_price: any number that could be a price (e.g. "150000", "850000 fcfa", "5000 cfa", "$200", "150k")

@@ -12,16 +12,23 @@ def load_prompt_template() -> str:
     return PROMPT_PATH.read_text(encoding="utf-8")
 
 
-def generate_listing(category: str, raw_input: str) -> dict:
+def generate_listing(category: str, raw_input: str, language: str = "english") -> dict:
     """Send the merchant's input to the local LLM and return a parsed listing.
 
-    The LLM detects the language and produces the structured listing in one call.
+    Args:
+        category: Product or service category selected by the user.
+        raw_input: The merchant's rough description.
+        language: 'english' or 'french' — user-selected output language.
 
     Raises:
         ValueError: if the model returns invalid JSON.
     """
     template = load_prompt_template()
-    prompt = template.format(category=category, raw_input=raw_input)
+    prompt = template.format(
+        category=category,
+        raw_input=raw_input,
+        language=language.upper()
+    )
 
     response = ollama.chat(
         model=MODEL_NAME,
