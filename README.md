@@ -46,18 +46,18 @@ KOLO Listing Assistant uses a **multi-step LLM pipeline with deterministic Pytho
 flowchart TD
     User[User input<br/>Raw text + category + language]:::input
 
-    User --> Gen[1\. Generate LLM #1<br/>Llama 3.2 produces structured JSON]:::llm
-    Gen --> Val[2\. Validate & Enrich Python<br/>Schema check + trust score]:::python
-    Val --> Fact[3\. Fact-Check Gate Python<br/>Strip hallucinated facts]:::python
-    Fact --> Crit[4\. Critique LLM #2<br/>Score on 6 criteria, max 12]:::llm
+    User --> Gen[1. Generate LLM #1<br/>Llama 3.2 produces structured JSON]:::llm
+    Gen --> Val[2. Validate & Enrich Python<br/>Schema check + trust score]:::python
+    Val --> Fact[3. Fact-Check Gate Python<br/>Strip hallucinated facts]:::python
+    Fact --> Crit[4. Critique LLM #2<br/>Score on 6 criteria, max 12]:::llm
     Crit --> Decision{Score >= 10?}:::decision
 
     Decision -->|Yes| Final[Final listing<br/>Shown to user]:::output
-    Decision -->|No| Refine[5\. Refine LLM #3<br/>Re-generate using critic notes]:::llm
+    Decision -->|No| Refine[5. Refine LLM #3<br/>Re-generate using critic notes]:::llm
 
-    Refine --> Fact2[6\. Re-fact-check Python<br/>Strip any new hallucinations]:::python
-    Fact2 --> Crit2[7\. Re-critique LLM #4<br/>Score the refined version]:::llm
-    Crit2 --> Best[8\. Best-of-attempts Python<br/>Keep higher-scoring version]:::python
+    Refine --> Fact2[6. Re-fact-check Python<br/>Strip any new hallucinations]:::python
+    Fact2 --> Crit2[7. Re-critique LLM #4<br/>Score the refined version]:::llm
+    Crit2 --> Best[8. Best-of-attempts Python<br/>Keep higher-scoring version]:::python
     Best --> Final
 
     classDef input fill:#F1EFE8,stroke:#5F5E5A,color:#2C2C2A
