@@ -188,53 +188,58 @@ The app will open automatically at `http://localhost:8501`.
 **Input:** _"iphone 12 good condition 128gb black with charger 150000 fcfa"_ (English selected)
 
 **Output:**
-Title: iPhone 12 in Good Condition with Charger
-Category: Phones & Tablets
-Tags: iphone, apple, smartphone, 128gb, black
-Buyer Trust Score: 95 / 100
-AI Quality Score: 12 / 12 PASS
-Pitch: Get this iPhone 12 in good condition with charger
-for 150,000 FCFA. Perfect for those looking for a
-reliable phone at an affordable price.
+
+```
+Title:               iPhone 12 in Good Condition with Charger
+Category:            Phones & Tablets
+Tags:                iphone, apple, smartphone, 128gb, black
+Buyer Trust Score:   95 / 100
+AI Quality Score:    12 / 12 PASS
+Pitch:               Get this iPhone 12 in good condition with charger
+                     for 150,000 FCFA. Perfect for those looking for a
+                     reliable phone at an affordable price.
+```
 
 ---
 
 ## 📁 Project Structure
 
+```
 kolo-listing-assistant/
-├── app.py # Streamlit entry point (UI + pipeline trace display)
-├── pyproject.toml # UV project manifest
-├── uv.lock # Locked dependency versions
-├── .python-version # Python 3.11 pinned
-├── README.md # This file
-├── IMPLEMENTATION.md # Step-by-step build guide
-├── LICENSE # MIT License
+├── app.py                          # Streamlit entry point (UI + pipeline trace display)
+├── pyproject.toml                  # UV project manifest
+├── uv.lock                         # Locked dependency versions
+├── .python-version                 # Python 3.11 pinned
+├── README.md                       # This file
+├── IMPLEMENTATION.md               # Step-by-step build guide
+├── LICENSE                         # MIT License
 ├── .gitignore
 │
 ├── src/
-│ ├── init.py
-│ ├── llm_client.py # Ollama client (generate_listing)
-│ ├── response_parser.py # Validation + Python-side trust score + explanation
-│ ├── fact_checker.py # Anti-hallucination gate (regex + lexicon)
-│ ├── critic.py # Self-critique LLM call + scoring
-│ ├── refiner.py # Refinement LLM call
-│ └── orchestrator.py # Full pipeline (generate → critique → refine → best-of-N)
+│   ├── __init__.py
+│   ├── llm_client.py               # Ollama client (generate_listing)
+│   ├── response_parser.py          # Validation + Python-side trust score + explanation
+│   ├── fact_checker.py             # Anti-hallucination gate (regex + lexicon)
+│   ├── critic.py                   # Self-critique LLM call + scoring
+│   ├── refiner.py                  # Refinement LLM call
+│   └── orchestrator.py             # Full pipeline (generate → critique → refine → best-of-N)
 │
 ├── prompts/
-│ ├── listing_prompt.txt # Initial generation prompt
-│ ├── critique_prompt.txt # 6-criterion critique prompt
-│ └── refine_prompt.txt # Refinement prompt with anti-hallucination rules
+│   ├── listing_prompt.txt          # Initial generation prompt
+│   ├── critique_prompt.txt         # 6-criterion critique prompt
+│   └── refine_prompt.txt           # Refinement prompt with anti-hallucination rules
 │
 ├── docs/
-│ ├── proposal.pdf # CAP 942 project proposal
-│ ├── architecture.mmd # Mermaid source for the pipeline diagram
-│ ├── images/
-│ │ └── architecture-diagram.png # Rendered architecture diagram for slides
-│ └── presentation.pdf # Final presentation slides (forthcoming)
+│   ├── proposal.pdf                # CAP 942 project proposal
+│   ├── architecture.mmd            # Mermaid source for the pipeline diagram
+│   ├── images/
+│   │   └── architecture-diagram.png # Rendered architecture diagram for slides
+│   └── presentation.pdf            # Final presentation slides (forthcoming)
 │
 └── examples/
-├── sample_inputs.json # Test cases for demos
-└── sample_outputs.json # Expected outputs
+    ├── sample_inputs.json          # Test cases for demos
+    └── sample_outputs.json         # Expected outputs
+```
 
 ---
 
