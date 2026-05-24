@@ -1,0 +1,107 @@
+<svg width="1100" height="320" viewBox="0 0 1100 320" xmlns="http://www.w3.org/2000/svg">
+
+  <defs>
+    <radialGradient id="iris" cx="38%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#0BBF7A"/>
+      <stop offset="45%"  stop-color="#078a55"/>
+      <stop offset="100%" stop-color="#04502f"/>
+    </radialGradient>
+    <radialGradient id="sclera" cx="42%" cy="36%" r="62%">
+      <stop offset="0%"   stop-color="#f0fdf7"/>
+      <stop offset="100%" stop-color="#d8f0e8"/>
+    </radialGradient>
+    <radialGradient id="pupil" cx="36%" cy="30%" r="66%">
+      <stop offset="0%"   stop-color="#0d1e2c"/>
+      <stop offset="100%" stop-color="#060c14"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ══════════════════════════════
+       K
+  ══════════════════════════════ -->
+  <rect x="20" y="38" width="28" height="220" rx="8" fill="#0BBF7A"/>
+  <path d="M48 148 L168 38 L196 38 L196 66 L80 160 Z" fill="#0BBF7A"/>
+  <path d="M48 168 L168 258 L196 258 L196 230 L80 156 Z" fill="#0BBF7A"/>
+  <rect x="170" y="34"  width="28" height="34" rx="10" fill="#0BBF7A"/>
+  <rect x="170" y="224" width="28" height="34" rx="10" fill="#0BBF7A"/>
+
+  <!-- ══════════════════════════════
+       LEFT EYE  (first O)
+       cx=282  cy=148  r=110
+  ══════════════════════════════ -->
+  <circle cx="282" cy="148" r="110" fill="#0BBF7A"/>
+  <circle cx="282" cy="151" r="86"  fill="url(#sclera)"/>
+  <circle cx="282" cy="154" r="56"  fill="url(#iris)"/>
+  <circle cx="282" cy="156" r="26"  fill="url(#pupil)"/>
+  <circle cx="260" cy="130" r="12"  fill="white" opacity="0.95"/>
+  <circle cx="283" cy="122" r="6"   fill="white" opacity="0.60"/>
+  <path d="M174,110 Q282,68 390,110"
+        stroke="#0BBF7A" stroke-width="6"
+        fill="none" stroke-linecap="round" opacity="0.22"/>
+
+  <!-- ══════════════════════════════
+       NOSE  (L)  cx=400
+  ══════════════════════════════ -->
+  <rect x="386" y="60"  width="28" height="126" rx="14" fill="#0BBF7A"/>
+  <rect x="358" y="166" width="84" height="26"  rx="13" fill="#0BBF7A"/>
+  <ellipse cx="368" cy="210" rx="22" ry="15" fill="#0BBF7A"/>
+  <ellipse cx="432" cy="210" rx="22" ry="15" fill="#0BBF7A"/>
+  <circle  cx="400" cy="204" r="16"            fill="#0BBF7A"/>
+
+  <!-- ══════════════════════════════
+       RIGHT EYE  (second O)
+       cx=518  cy=148  r=110
+  ══════════════════════════════ -->
+  <circle cx="518" cy="148" r="110" fill="#0BBF7A"/>
+  <circle cx="518" cy="151" r="86"  fill="url(#sclera)"/>
+  <circle cx="518" cy="154" r="56"  fill="url(#iris)"/>
+  <circle cx="518" cy="156" r="26"  fill="url(#pupil)"/>
+  <circle cx="496" cy="130" r="12"  fill="white" opacity="0.95"/>
+  <circle cx="519" cy="122" r="6"   fill="white" opacity="0.60"/>
+  <path d="M410,110 Q518,68 626,110"
+        stroke="#0BBF7A" stroke-width="6"
+        fill="none" stroke-linecap="round" opacity="0.22"/>
+
+  <!-- ══════════════════════════════
+       EYEBROWS
+  ══════════════════════════════ -->
+  <rect x="194" y="22" width="176" height="16" rx="8" fill="#0BBF7A"/>
+  <rect x="430" y="22" width="176" height="16" rx="8" fill="#0BBF7A"/>
+
+  <!-- ══════════════════════════════
+       SMILE
+  ══════════════════════════════ -->
+  <path d="M316,252 Q400,296 484,252"
+        stroke="#0BBF7A" stroke-width="10"
+        fill="none" stroke-linecap="round"/>
+
+  <!-- ══════════════════════════════
+       VERTICAL DIVIDER
+  ══════════════════════════════ -->
+  <line x1="660" y1="28" x2="660" y2="272"
+        stroke="#0BBF7A" stroke-width="1.5" opacity="0.25"/>
+
+  <!-- ══════════════════════════════
+       WORDMARK — KOLO.ci
+       Single text element with tspan for color split
+       No dx tricks — straightforward inline tspan
+  ══════════════════════════════ -->
+  <text x="686" y="190"
+        font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+        font-size="86"
+        font-weight="900"
+        letter-spacing="-2"
+        fill="#0BBF7A">KOLO<tspan fill="#06DC8C">.ci</tspan></text>
+
+  <!-- ══════════════════════════════
+       TAGLINE
+  ══════════════════════════════ -->
+  <text x="688" y="228"
+        font-family="'Arial','Helvetica',sans-serif"
+        font-size="15"
+        font-weight="400"
+        fill="#0BBF7A"
+        opacity="0.55"
+        letter-spacing="3.5">KOLO KOLO · DEAL SÉCURISÉ</text>
+
+</svg>
