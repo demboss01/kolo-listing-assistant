@@ -7,7 +7,7 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.57-FF4B4B)
 ![Ollama](https://img.shields.io/badge/Ollama-Llama%203.2%203B-black)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-Day%201%20Complete%20%E2%80%94%20Scaffold%20Ready-success)
+![Status](https://img.shields.io/badge/Status-Functional%20Multi--Step%20Pipeline-success)
 
 ---
 
@@ -15,53 +15,88 @@
 
 The **KOLO Listing Assistant** is a capstone project built for **CAP 942 — Capstone Project: AI Application Development**. It solves a concrete problem faced by informal-market merchants in West Africa: rough, unstructured marketplace listings that lose buyers and reduce trust scores.
 
-A merchant types a brief, casual description — for example, *"iphone 12 good condition 128gb black with charger 150000 fcfa"* — and the application returns a structured, polished listing with a title, description, suggested category, tags, a trust-quality score, and a ready-to-send WhatsApp pitch. Everything runs locally on the user's machine through [Ollama](https://ollama.com), with no data ever leaving the device.
+A merchant types a brief, casual description — for example, _"iphone 12 good condition 128gb black with charger 150000 fcfa"_ — and the application returns a structured, polished listing with a title, description, suggested category, tags, two quality scores, and a ready-to-send WhatsApp pitch. Everything runs locally on the user's machine through [Ollama](https://ollama.com), with no data ever leaving the device.
+
+What makes this project distinctive is the **multi-step LLM pipeline with deterministic Python guardrails**: the system makes up to 4 LLM calls per request (generate → critique → refine → re-critique) and uses Python between every LLM call to validate, fact-check, score, and pick the best result.
 
 ---
 
 ## ✨ Features
 
 - 🎯 **Single-input simplicity** — paste a rough description, get a polished listing in seconds
-- 🏷️ **Auto-generated title** — search-optimized, 8–14 words
-- 📝 **Structured description** — condition, specs, accessories, guarantees
-- 🗂️ **Smart categorization** — suggested category and tags
-- 🛡️ **Trust-quality score** — 0–100 score with explanation of missing trust signals
+- 🔁 **Multi-step LLM chain** — generate → critique → refine, with Python fact-check gates between steps
+- 🛡️ **Anti-hallucination fact-check** — Python deterministically strips invented prices, brands, and accessories before they reach the user
+- 🔍 **Self-critique** — a second LLM scores the first LLM's output on 6 quality criteria
+- ✨ **Conditional refinement** — refinement triggers only when the critic score falls below threshold
+- 🌍 **Explicit bilingual support** — French / English toggle in the UI (no probabilistic language detection)
+- 🛡️ **Buyer Trust Score** — 0–100 score measuring how much info the merchant provided
+- ✍️ **AI Quality Score** — 0–12 score measuring how well the AI wrote the listing
 - 💬 **WhatsApp pitch** — copy-paste-ready conversational message for buyers
+- 🤖 **Transparent AI process panel** — UI exposes every pipeline step with status, timing, and decisions
 - 🔒 **Fully offline** — no API keys, no paid services, no data leaves your machine
-- 📸 **Photo support** *(v2, optional)* — upload a product image for vision-augmented generation
+- 📸 **Photo support** _(v2, optional)_ — upload a product image for vision-augmented generation _(planned)_
 
 ---
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────┐      ┌──────────────────┐      ┌────────────────┐
-│  Streamlit UI   │ ───▶ │ Prompt Assembler │ ───▶ │  Ollama Local  │
-│  (User Input)   │      │   (Templating)   │      │  Llama 3.2 3B  │
-└─────────────────┘      └──────────────────┘      └────────┬───────┘
-        ▲                                                    │
-        │                                                    ▼
-        │                ┌──────────────────┐      ┌────────────────┐
-        └──────────────  │ JSON Parser +    │ ◀─── │ Structured     │
-                         │  Validator       │      │ JSON Response  │
-                         └──────────────────┘      └────────────────┘
+KOLO Listing Assistant uses a **multi-step LLM pipeline with deterministic Python guardrails**. The system makes up to 4 LLM calls per request (generate → critique → refine → re-critique), with Python steps between every LLM call to validate, score, fact-check, and pick the best result.
+
+```mermaid
+flowchart TD
+    User[User input<br/>Raw text + category + language]:::input
+
+    User --> Gen[1\. Generate LLM #1<br/>Llama 3.2 produces structured JSON]:::llm
+    Gen --> Val[2\. Validate & Enrich Python<br/>Schema check + trust score]:::python
+    Val --> Fact[3\. Fact-Check Gate Python<br/>Strip hallucinated facts]:::python
+    Fact --> Crit[4\. Critique LLM #2<br/>Score on 6 criteria, max 12]:::llm
+    Crit --> Decision{Score >= 10?}:::decision
+
+    Decision -->|Yes| Final[Final listing<br/>Shown to user]:::output
+    Decision -->|No| Refine[5\. Refine LLM #3<br/>Re-generate using critic notes]:::llm
+
+    Refine --> Fact2[6\. Re-fact-check Python<br/>Strip any new hallucinations]:::python
+    Fact2 --> Crit2[7\. Re-critique LLM #4<br/>Score the refined version]:::llm
+    Crit2 --> Best[8\. Best-of-attempts Python<br/>Keep higher-scoring version]:::python
+    Best --> Final
+
+    classDef input fill:#F1EFE8,stroke:#5F5E5A,color:#2C2C2A
+    classDef llm fill:#EEEDFE,stroke:#534AB7,color:#26215C
+    classDef python fill:#E1F5EE,stroke:#0F6E56,color:#04342C
+    classDef decision fill:#FAEEDA,stroke:#854F0B,color:#412402
+    classDef output fill:#F1EFE8,stroke:#5F5E5A,color:#2C2C2A
 ```
 
-A more detailed workflow diagram lives in [`docs/workflow_diagram.png`](docs/workflow_diagram.png).
+A polished PNG version of this diagram lives at [`docs/images/architecture-diagram.png`](docs/images/architecture-diagram.png).
+
+### Design Principle: LLM for Understanding, Python for Decisions
+
+Every Python step represents a deliberate engineering choice where I moved a deterministic decision OUT of the LLM, because small LLMs are unreliable at tasks Python solves perfectly:
+
+| Decision                            | Why moved to Python                                     |
+| ----------------------------------- | ------------------------------------------------------- |
+| Trust score arithmetic              | LLM sometimes reported 9 when criteria summed to 11     |
+| Critic total score                  | Same arithmetic unreliability                           |
+| Verdict / threshold decision        | LLM said PASS while score was below threshold           |
+| Trust explanation text              | LLM contradicted its own boolean signals                |
+| `has_price` detection               | LLM was inconsistent; regex is 100% reliable            |
+| Fact-checking against hallucination | Deterministic guarantee, not instruction-following hope |
+
+This is the project's strongest design pattern: **the LLM does the qualitative semantic work; Python handles every quantitative or pattern-matching decision.**
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Tool | Purpose |
-|-------|------|---------|
-| Language | Python 3.11 | Application logic |
-| Package Manager | [UV](https://docs.astral.sh/uv/) | Fast, reproducible Python project management |
-| LLM Runtime | [Ollama](https://ollama.com) | Local model hosting |
-| Text Model | Llama 3.2 3B | Listing generation |
-| Vision Model *(v2)* | LLaVA 7B | Photo-based extraction |
-| UI Framework | [Streamlit](https://streamlit.io) | Web interface |
-| Image Handling | Pillow | Image preprocessing (v2) |
+| Layer               | Tool                              | Purpose                                      |
+| ------------------- | --------------------------------- | -------------------------------------------- |
+| Language            | Python 3.11                       | Application logic                            |
+| Package Manager     | [UV](https://docs.astral.sh/uv/)  | Fast, reproducible Python project management |
+| LLM Runtime         | [Ollama](https://ollama.com)      | Local model hosting                          |
+| Text Model          | Llama 3.2 3B                      | Generation, critique, refinement             |
+| Vision Model _(v2)_ | LLaVA 7B                          | Photo-based extraction (planned)             |
+| UI Framework        | [Streamlit](https://streamlit.io) | Web interface                                |
+| Image Handling      | Pillow                            | Image preprocessing (v2)                     |
 
 ---
 
@@ -72,9 +107,9 @@ A more detailed workflow diagram lives in [`docs/workflow_diagram.png`](docs/wor
 - **macOS, Linux, or Windows** with at least **16 GB RAM**
 - **Python 3.11+** (UV will install this for you if missing)
 - **Ollama** ([download](https://ollama.com/download))
-- **~7 GB free disk space** for model weights
+- **~3 GB free disk space** for model weights
 
-> **Tested on:** Apple M1 Pro, 16 GB RAM, macOS. Performance: ~1–3 seconds per generation.
+> **Tested on:** Apple M1 Pro, 16 GB RAM, macOS. Performance: ~5–15 seconds per generation (longer when refinement triggers).
 
 ### Step 1 — Install UV
 
@@ -139,81 +174,78 @@ The app will open automatically at `http://localhost:8501`.
 
 ## 🚀 Usage
 
-1. **Select a product category** from the dropdown in the sidebar.
-2. **Paste your rough listing** into the text area — informal language is fine, French or English are both supported.
-3. **(Optional, v2)** Upload a product photo.
-4. **Click "Optimize Listing"** and wait a few seconds.
-5. **Review the structured output** on the right: title, description, tags, trust score, and WhatsApp pitch.
-6. **Copy any field** to your clipboard with the per-field copy button.
+1. **Select an output language** (French / English) in the sidebar.
+2. **Select a product category** from the sidebar dropdown.
+3. **Paste your rough listing** into the text area — informal language is fine.
+4. **Optionally click a Quick Example preset** (iPhone, Yamaha, Perfume, or Vague) to see how the system handles different input qualities.
+5. **Click "Optimize Listing"** and wait a few seconds (5–15 typically).
+6. **Review the structured output** on the right: title, description, tags, two scores, and WhatsApp pitch.
+7. **Expand the AI Process panel** to see each pipeline step (Generate → Validate → Enrich → Fact-Check → Critique → optional Refine → Best-of-attempts) with status and timing.
+8. **Copy the pitch** with one click and paste it into WhatsApp.
 
 ### Example
 
-**Input:**
-```
-iphone 12 good condition 128gb black with charger 150000 fcfa
-```
+**Input:** _"iphone 12 good condition 128gb black with charger 150000 fcfa"_ (English selected)
 
 **Output:**
-```
-Title:        iPhone 12 128GB Black — Excellent Condition with Original Charger
-Category:     Phones & Tablets
-Tags:         iphone, apple, smartphone, 128gb, black
-Trust Score:  78 / 100
-Pitch:        Hello! I'm selling my iPhone 12 (128GB, black) in
-              excellent condition with its original charger. Price: 150,000 FCFA.
-              Available for demonstration. Interested?
-```
+Title: iPhone 12 in Good Condition with Charger
+Category: Phones & Tablets
+Tags: iphone, apple, smartphone, 128gb, black
+Buyer Trust Score: 95 / 100
+AI Quality Score: 12 / 12 PASS
+Pitch: Get this iPhone 12 in good condition with charger
+for 150,000 FCFA. Perfect for those looking for a
+reliable phone at an affordable price.
 
 ---
 
 ## 📁 Project Structure
 
-```
 kolo-listing-assistant/
-├── app.py                      # Streamlit entry point
-├── pyproject.toml              # UV project manifest
-├── uv.lock                     # Locked dependency versions
-├── .python-version             # Python 3.11 pinned
-├── README.md                   # This file
-├── IMPLEMENTATION.md           # Step-by-step build guide
-├── LICENSE                     # MIT License
+├── app.py # Streamlit entry point (UI + pipeline trace display)
+├── pyproject.toml # UV project manifest
+├── uv.lock # Locked dependency versions
+├── .python-version # Python 3.11 pinned
+├── README.md # This file
+├── IMPLEMENTATION.md # Step-by-step build guide
+├── LICENSE # MIT License
 ├── .gitignore
-├── .env.example                # Configuration template
 │
 ├── src/
-│   ├── __init__.py
-│   ├── llm_client.py           # Ollama HTTP client wrapper
-│   ├── prompt_builder.py       # Prompt assembly logic
-│   ├── response_parser.py      # JSON validation and parsing
-│   └── vision_extractor.py     # (v2) Photo description pipeline
+│ ├── init.py
+│ ├── llm_client.py # Ollama client (generate_listing)
+│ ├── response_parser.py # Validation + Python-side trust score + explanation
+│ ├── fact_checker.py # Anti-hallucination gate (regex + lexicon)
+│ ├── critic.py # Self-critique LLM call + scoring
+│ ├── refiner.py # Refinement LLM call
+│ └── orchestrator.py # Full pipeline (generate → critique → refine → best-of-N)
 │
 ├── prompts/
-│   ├── listing_prompt.txt      # Main generation template
-│   └── vision_prompt.txt       # (v2) Vision extraction template
+│ ├── listing_prompt.txt # Initial generation prompt
+│ ├── critique_prompt.txt # 6-criterion critique prompt
+│ └── refine_prompt.txt # Refinement prompt with anti-hallucination rules
 │
 ├── docs/
-│   ├── proposal.pdf            # CAP 942 project proposal
-│   ├── workflow_diagram.png    # Architecture diagram
-│   └── presentation.pdf        # Final presentation slides
+│ ├── proposal.pdf # CAP 942 project proposal
+│ ├── architecture.mmd # Mermaid source for the pipeline diagram
+│ ├── images/
+│ │ └── architecture-diagram.png # Rendered architecture diagram for slides
+│ └── presentation.pdf # Final presentation slides (forthcoming)
 │
-├── examples/
-│   ├── sample_inputs.json      # Test cases for demos
-│   └── sample_outputs.json     # Expected outputs
-│
-└── tests/
-    └── test_parser.py          # Output validation tests
-```
+└── examples/
+├── sample_inputs.json # Test cases for demos
+└── sample_outputs.json # Expected outputs
 
 ---
 
 ## 🎓 Academic Context
 
-This project was developed for **CAP 942 — Capstone Project: AI Application Development**. It satisfies all course requirements:
+This project was developed for **CAP 942 — Capstone Project: AI Application Development**. It satisfies the course requirements:
 
-- ✅ Uses an open-source LLM (Llama 3.2 via Ollama)
+- ✅ Uses an open-source LLM (Llama 3.2 3B via Ollama)
 - ✅ Accepts user input and produces LLM-generated output
 - ✅ Runs as a Streamlit web application
-- ✅ Implements an optional multi-step chain (vision → text) for advanced rubric credit
+- ✅ Implements a **multi-step LLM chain** (generate → critique → refine → re-critique) for advanced rubric credit
 - ✅ Operates entirely without paid APIs
 
 For the full problem statement, methodology, and design rationale, see [`docs/proposal.pdf`](docs/proposal.pdf).
@@ -224,23 +256,25 @@ For the full problem statement, methodology, and design rationale, see [`docs/pr
 
 - [x] Project proposal submitted
 - [x] Repository scaffolded with UV
-- [ ] Core prompt template developed
-- [ ] LLM client and response parser implemented
-- [ ] Streamlit UI complete (v1)
-- [ ] End-to-end testing with realistic merchant inputs
-- [ ] Vision model integration (v2, optional)
-- [ ] Workflow diagram and final documentation
-- [ ] Presentation deck and backup demo video
+- [x] Core prompt templates developed
+- [x] LLM client and response parser implemented
+- [x] Multi-step LLM chain (critic + refiner)
+- [x] Python fact-check gate (anti-hallucination)
+- [x] Streamlit UI with bilingual toggle and pipeline trace
+- [x] Architecture diagram and README documentation
+- [ ] Vision model integration (v2, optional, pending advisor confirmation)
+- [ ] Final presentation deck and backup demo video
 - [ ] Final submission to Canvas
 
 ---
 
 ## ⚠️ Known Limitations
 
-- **Cold-start latency** — the first generation after launching the app takes ~3–5 seconds while the model loads into memory. Subsequent generations are fast (~1–3 seconds).
-- **Output variability** — LLM responses are non-deterministic by nature. The same input may produce slightly different outputs across runs.
-- **Vision model accuracy *(v2)*** — vision models occasionally misidentify product details, especially in low-light photos. The text model still produces a usable listing from the merchant's typed input.
-- **Hardware dependency** — performance is best on Apple Silicon or recent Intel/AMD machines with 16 GB+ RAM. On lower-end hardware, consider using `moondream` as an even lighter alternative.
+- **Cold-start latency** — the first generation after launching the app takes ~10 seconds while the model loads into memory. Subsequent generations are faster (~5–15 seconds depending on whether refinement triggers).
+- **3B-model trade-offs** — Llama 3.2 3B occasionally produces broken-sentence text on very sparse inputs (e.g. literally "phone for sale"). The fact-check gate guarantees no fabricated facts, but stripping invented words can leave terse output. This is a deliberate trade-off in favor of honesty over polish.
+- **Output variability** — LLM responses are non-deterministic by design. The same input may produce slightly different outputs across runs. The critique-and-refine loop is meant to absorb most of this variance.
+- **Vision model _(v2, planned)_** — vision-augmented generation is in the project plan but not yet implemented. Final inclusion depends on advisor guidance.
+- **Hardware dependency** — performance is best on Apple Silicon or recent Intel/AMD machines with 16 GB+ RAM. On lower-end hardware, expect longer per-step latency.
 
 ---
 
