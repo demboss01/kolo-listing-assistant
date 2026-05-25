@@ -21,7 +21,7 @@ if "warmed_up" not in st.session_state:
             st.stop()
 
 with st.sidebar:
-    st.image("docs/images/logos/kolo-icon.png", use_container_width=True)
+    st.image("docs/images/logos/kolo-icon.png", width="stretch")
     st.markdown("### Listing Assistant")
     st.caption("AI tool for KOLO.ci merchants — runs 100% locally")
     st.divider()
