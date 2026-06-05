@@ -43,14 +43,22 @@ KNOWN_BRANDS = {
 
 # ── Price normalization ────────────────────────────────────────────────────
 
+# Strong price patterns: must look like a price, not a spec number.
+# Spec numbers like "i5-13420H", "8GB", "512GB" should NOT match.
 PRICE_NUMBER_PATTERN = re.compile(
     r"""
     (?:
-        \d{1,3}(?:[ ,]\d{3})+     # 150,000 or 150 000
+        # Number with explicit thousand-separators (very price-shaped)
+        \d{1,3}(?:[ ,]\d{3})+
         |
-        \d+\s?k                   # 150k or 150 k
+        # "150k" / "150 k" — must not be preceded by alphanumeric
+        (?<![A-Za-z0-9])\d+\s?k\b
         |
-        \d{3,}                    # 850000
+        # Bare number 1000+ followed by currency word
+        \d{4,}(?=\s*(?:FCFA|fcfa|XOF|CFA|francs?))
+        |
+        # Bare number 1000+ preceded by currency-context word
+        (?<=(?:prix|price|priced at|cost|for|coût|pour)\s)\d{4,}
     )
     """,
     re.IGNORECASE | re.VERBOSE,
