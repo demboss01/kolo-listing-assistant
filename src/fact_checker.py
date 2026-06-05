@@ -86,7 +86,7 @@ def _extract_price_numbers(text: str) -> list[int]:
     numbers = []
     for m in matches:
         n = _normalize_price_token(m)
-        if n is not None and n >= 100:  # filter out tiny numbers that aren't prices
+        if n is not None and n >= 1000:  # filter out tiny numbers that aren't prices
             numbers.append(n)
     return numbers
 
